@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block page %}
+<div class="cards">
+  <div class="card" style="grid-column: 1 / -1;">
+    <div class="card-header">
+      <h3>Reports</h3>
+      <div class="muted">Download detection logs and view summary stats.</div>
+    </div>
+    <div class="summary-grid">
+      <div class="summary-card gradient-blue">
+        <div class="label">Total Detections</div>
+        <div class="value">{{ total }}</div>
+      </div>
+      <div class="summary-card gradient-teal">
+        <div class="label">Known</div>
+        <div class="value">{{ known }}</div>
+      </div>
+      <div class="summary-card gradient-purple">
+        <div class="label">Unknown</div>
+        <div class="value">{{ unknown }}</div>
+      </div>
+      <div class="summary-card gradient-lavender">
+        <div class="label">Avg Confidence</div>
+        <div class="value">{{ avg_conf }}%</div>
+      </div>
+    </div>
+    <div style="margin-top:16px; display:flex; gap:8px;">
+      <a class="primary" href="/reports/download?format=csv">Download CSV</a>
+      <a class="secondary" href="/reports/download?format=html">View HTML Export</a>
+    </div>
+  </div>
+</div>
+{% endblock %}

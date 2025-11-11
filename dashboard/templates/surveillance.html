@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block page %}
+<div class="cards">
+  <div class="card" style="grid-column: 1 / -1;">
+    <div class="card-header">
+      <h3>Live Surveillance</h3>
+      <div class="muted">Real-time feed with bounding boxes and labels.</div>
+    </div>
+    <div style="display:flex; justify-content:center;">
+      <img src="/stream" alt="live" style="max-width:100%; border-radius:12px;" />
+    </div>
+  </div>
+</div>
+{% endblock %}

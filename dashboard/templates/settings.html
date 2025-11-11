@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+{% block page %}
+<div class="cards">
+  <div class="card" style="grid-column: 1 / -1; max-width:720px; margin:0 auto;">
+    <div class="card-header">
+      <h3>Settings</h3>
+      <div class="muted">Adjust recognition and surveillance settings.</div>
+    </div>
+    <form method="post" class="form">
+      <div class="form-row">
+        <label>Recognition Threshold</label>
+        <input type="number" step="0.01" min="0.1" max="1.0" name="recognition_threshold" value="{{ threshold }}" />
+      </div>
+      <div class="form-row">
+        <label>Camera Source</label>
+        <input type="text" name="camera_source" value="{{ camera_source }}" />
+        <small class="muted">Use index like 0, or RTSP/HTTP URL.</small>
+      </div>
+      <div class="form-row">
+        <label>Storage Directory</label>
+        <input type="text" name="storage_dir" value="{{ storage_dir }}" />
+      </div>
+      <div class="form-row">
+        <label><input type="checkbox" name="auto_start" {% if auto_start %}checked{% endif %} /> Auto-start surveillance on launch</label>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <a class="secondary" href="/">Cancel</a>
+        <button class="primary">Save Settings</button>
+      </div>
+    </form>
+  </div>
+</div>
+{% endblock %}

@@ -1,0 +1,74 @@
+{% extends 'base.html' %}
+{% set active = 'results' %}
+{% block page %}
+  {% if not event %}
+    <div class="card soft">
+      <div class="card-title">Result Not Found</div>
+      <p class="muted">The requested event could not be located.</p>
+    </div>
+  {% else %}
+    <div class="page-header">
+      <h1>Result Details</h1>
+      <p class="muted">Detailed view with breakdown and actions.</p>
+    </div>
+
+    <div class="grid-2">
+      <div class="card soft">
+        <div class="card-title">Profile</div>
+        <div class="row-thumb">
+          {% if event.image_path %}<img src="{{ event.image_path }}" />{% endif %}
+          <div>
+            <div class="bold">{{ event.name }}</div>
+            <div class="muted">{{ event.category }}</div>
+            <div class="muted">{{ event.timestamp }}</div>
+            <span class="badge {% if event.status=='Passed' %}green{% elif event.status=='Failed' %}red{% else %}yellow{% endif %}">{{ event.status }}</span>
+          </div>
+        </div>
+        <div class="actions-row">
+          <a class="btn" href="{{ event.image_path }}" download>Download Report (Image)</a>
+          <button class="btn ghost" id="shareBtn">Share Result</button>
+        </div>
+      </div>
+
+      <div class="card soft">
+        <div class="card-title">Score Summary</div>
+        <div class="circle-wrap">
+          <svg viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="54" class="track" />
+            <circle cx="60" cy="60" r="54" class="progress" style="--val: {{ event.score }}" />
+          </svg>
+          <div class="circle-label">
+            <div class="value">{{ event.score }}</div>
+            <div class="muted">Score</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2">
+      <div class="card soft">
+        <div class="card-title">Category-wise Performance</div>
+        {% set total_breakdown = (breakdown['Passed'] + breakdown['Pending'] + breakdown['Failed']) %}
+        {% if total_breakdown == 0 %}
+          <p class="muted">No performance data available for this person yet.</p>
+        {% else %}
+          <div class="chart-card">
+            <canvas id="breakdownChart"></canvas>
+          </div>
+        {% endif %}
+      </div>
+      <div class="card soft">
+        <div class="card-title">Remarks</div>
+        <textarea class="textarea" rows="6" placeholder="Add feedback or notes..."></textarea>
+        <div class="actions-row">
+          <button class="btn">Save</button>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      window.__breakdown = {{ breakdown|tojson }};
+      window.__shareUrl = window.location.href;
+    </script>
+  {% endif %}
+{% endblock %}

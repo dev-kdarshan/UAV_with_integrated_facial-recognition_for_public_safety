@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block page %}
+<div class="cards">
+  <div class="card" style="grid-column: 1 / -1; max-width:720px; margin:0 auto;">
+    <div class="card-header"><h3>Edit Profile</h3></div>
+    {% if face %}
+      <form method="post" class="form">
+        <div class="form-row"><label>Name</label><input type="text" name="name" value="{{ face.name }}" required /></div>
+        <div class="form-row"><label>ID</label><input type="text" name="person_id" value="{{ face.person_id }}" /></div>
+        <div class="form-row"><label>Department</label><input type="text" name="department" value="{{ face.department }}" /></div>
+        <div class="form-row"><label>Category</label>
+          <select name="category">
+            <option value="Normal" {% if face.category=='Normal' %}selected{% endif %}>Normal</option>
+            <option value="VIP" {% if face.category=='VIP' %}selected{% endif %}>VIP</option>
+            <option value="Blacklisted" {% if face.category=='Blacklisted' %}selected{% endif %}>Blacklisted</option>
+          </select>
+        </div>
+        <div style="display:flex; gap:8px;">
+          <a class="secondary" href="/users/{{ face.id }}">Cancel</a>
+          <button class="primary">Save</button>
+        </div>
+      </form>
+    {% else %}
+      <div class="alert">Profile not found.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

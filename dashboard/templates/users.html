@@ -1,0 +1,45 @@
+{% extends 'base.html' %}
+{% block page %}
+<div class="cards">
+  <div class="card" style="grid-column: 1 / -1;">
+    <div class="card-header">
+      <h3>Registered Personnel</h3>
+      <div class="muted">Manage profiles stored in the database.</div>
+    </div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Photo</th>
+            <th>Name</th>
+            <th>ID</th>
+            <th>Department</th>
+            <th>Category</th>
+            <th>Registered</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for f in faces %}
+          <tr>
+            <td>{% if f.image_path %}<img src="{{ f.image_path }}" alt="face" style="height:40px;border-radius:8px;" />{% else %}—{% endif %}</td>
+            <td>{{ f.name }}</td>
+            <td>{{ f.person_id }}</td>
+            <td>{{ f.department }}</td>
+            <td>{{ f.category }}</td>
+            <td>{{ f.date }}</td>
+            <td>
+              <a class="table-link" href="/users/{{ f.id }}">View</a>
+              <span class="muted">|</span>
+              <a class="table-link" href="/users/{{ f.id }}/edit">Edit</a>
+              <span class="muted">|</span>
+              <a class="table-link" href="/users/{{ f.id }}/delete" onclick="return confirm('Delete this user?')">Delete</a>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}

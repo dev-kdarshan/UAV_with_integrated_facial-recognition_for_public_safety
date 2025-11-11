@@ -1,0 +1,138 @@
+{% extends 'base.html' %}
+{% set active = 'dashboard' %}
+{% block page %}
+  <div class="page-header">
+    <h1>Dashboard</h1>
+    <p class="muted">Clean, responsive analytics overview for recognition events.</p>
+  </div>
+
+  <div class="summary-grid">
+    <div class="summary-card gradient-blue">
+      <div class="icon">📊</div>
+      <div class="label">Total Results</div>
+      <div class="value count" data-count="{{ total }}">0</div>
+    </div>
+    <div class="summary-card gradient-purple">
+      <div class="icon">✅</div>
+      <div class="label">Pass Percentage</div>
+      <div class="value count" data-count="{{ pass_percentage }}">0</div>
+      <div class="unit">%</div>
+    </div>
+    <div class="summary-card gradient-lavender">
+      <div class="icon">📈</div>
+      <div class="label">Average Score</div>
+      <div class="value count" data-count="{{ avg_score }}">0</div>
+    </div>
+    <div class="summary-card gradient-teal">
+      <div class="icon">⏳</div>
+      <div class="label">Pending Evaluations</div>
+      <div class="value count" data-count="{{ pending }}">0</div>
+    </div>
+  </div>
+
+  <div class="grid-2">
+    <div class="card soft">
+      <div class="card-title">Result Trends</div>
+      <div class="chart-card">
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+    <div class="card soft">
+      <div class="card-title">Progress Overview</div>
+      <div class="progress-group">
+        <div class="progress-item">
+          <span>Evaluation Completed</span>
+          <div class="progress"><div style="width: {{ progress.completed }}%"></div></div>
+        </div>
+        <div class="progress-item">
+          <span>Pending Review</span>
+          <div class="progress"><div style="width: {{ progress.pending }}%"></div></div>
+        </div>
+        <div class="progress-item">
+          <span>In Progress</span>
+          <div class="progress"><div style="width: {{ progress.in_progress }}%"></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card soft">
+    <div class="card-title">Recent Activity</div>
+    <div class="filters-row">
+      <form method="get" class="filters-form">
+        <input type="text" name="name" placeholder="Search name" />
+        <select name="category">
+          <option value="">All Categories</option>
+          <option>Normal</option>
+          <option>Blacklisted</option>
+          <option>Unknown</option>
+        </select>
+        <input type="date" name="date" />
+        <button type="submit" class="btn">Filter</button>
+        <a href="/" class="btn ghost">Reset</a>
+      </form>
+    </div>
+    <table class="table">
+      <thead>
+        <tr>
+          <th>Student/Task Name</th>
+          <th>Score</th>
+          <th>Status</th>
+          <th>Date</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for e in recent %}
+        <tr>
+          <td>
+            <div class="row-thumb">
+              {% if e.image_path %}<img src="{{ e.image_path }}" />{% endif %}
+              <div>
+                <div class="bold">{{ e.name }}</div>
+                <div class="muted">{{ e.category }}</div>
+              </div>
+            </div>
+          </td>
+          <td>{{ e.score }}</td>
+          <td>
+            <span class="badge {% if e.status=='Passed' %}green{% elif e.status=='Failed' %}red{% else %}yellow{% endif %}">{{ e.status }}</span>
+          </td>
+          <td>{{ e.timestamp }}</td>
+          <td><a class="btn tiny" href="{{ url_for('event_detail', source=e.source, filename=e.id.split(':',1)[1]) }}">View</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <div class="grid-gallery">
+    {% for e in events %}
+      <article class="card hover">
+        <div class="card-thumb">
+          {% if e.image_path %}
+            <img src="{{ e.image_path }}" alt="{{ e.name }}" />
+          {% else %}
+            <div class="no-image">No image</div>
+          {% endif %}
+        </div>
+        <div class="card-body">
+          <div class="card-title">{{ e.name }}</div>
+          <div class="card-meta">
+            <span class="badge {% if e.status=='Passed' %}green{% elif e.status=='Failed' %}red{% else %}yellow{% endif %}">{{ e.status }}</span>
+            <span class="muted">{{ e.category }}</span>
+          </div>
+          <div class="card-time">{{ e.timestamp }}</div>
+          {% if e.image_path %}
+            <a class="btn tiny" href="{{ url_for('event_detail', source=e.source, filename=e.id.split(':',1)[1]) }}">Open</a>
+          {% endif %}
+        </div>
+      </article>
+    {% endfor %}
+  </div>
+
+  <script>
+    window.__trendLabels = {{ trend_labels|tojson }};
+    window.__trendValues = {{ trend_values|tojson }};
+  </script>
+{% endblock %}

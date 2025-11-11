@@ -1,0 +1,29 @@
+{% extends 'base.html' %}
+{% block page %}
+<div class="cards">
+  <div class="card" style="grid-column: 1 / -1; max-width:720px; margin:0 auto;">
+    <div class="card-header"><h3>Profile</h3></div>
+    {% if face %}
+      <div style="display:flex; gap:16px;">
+        <div>
+          {% if face.image_path %}<img src="{{ face.image_path }}" alt="photo" style="width:160px;height:160px;border-radius:12px;object-fit:cover;" />{% endif %}
+        </div>
+        <div style="flex:1;">
+          <p><strong>Name:</strong> {{ face.name }}</p>
+          <p><strong>ID:</strong> {{ face.person_id }}</p>
+          <p><strong>Department:</strong> {{ face.department }}</p>
+          <p><strong>Category:</strong> {{ face.category }}</p>
+          <p><strong>Registered:</strong> {{ face.date }}</p>
+          <div style="margin-top:12px;">
+            <a class="secondary" href="/users/{{ face.id }}/edit">Edit</a>
+            <a class="danger" href="/users/{{ face.id }}/delete" onclick="return confirm('Delete this user?')">Delete</a>
+            <a class="ghost" href="/users">Back</a>
+          </div>
+        </div>
+      </div>
+    {% else %}
+      <div class="alert">Profile not found.</div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

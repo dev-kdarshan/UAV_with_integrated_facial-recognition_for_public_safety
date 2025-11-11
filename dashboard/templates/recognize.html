@@ -1,0 +1,202 @@
+{% extends 'base.html' %}
+{% block page %}
+<div class="cards">
+  {% if step == 'upload' %}
+  <div class="card soft" style="grid-column: 1 / -1;">
+    <div class="toolbar">
+      <div>
+        <h3 style="margin:0;">Recognize or Register Faces</h3>
+        <div class="subtle">Upload a photo or capture from your camera, tune the threshold, and analyze.</div>
+      </div>
+      <div class="actions">
+        <a class="btn ghost" href="/surveillance">🎥 Live Feed</a>
+        <a class="btn" href="/recognize/capture">📷 Use Camera</a>
+      </div>
+    </div>
+    <form method="post" enctype="multipart/form-data" class="form" style="margin-top:12px;">
+      {% if error %}<div class="alert">{{ error }}</div>{% endif %}
+      <div class="form-row" style="display:grid;grid-template-columns: 1fr 360px; gap: 16px; align-items:end;">
+        <div>
+          <label>Upload Image</label>
+          <input type="file" name="image" accept="image/*" required />
+          <p class="muted" style="margin-top:6px;">JPG/PNG/BMP · clear frontal faces recommended</p>
+        </div>
+        <div>
+          <label>Recognition Threshold</label>
+          <div class="range-group">
+            <input type="range" name="threshold" min="0.30" max="0.80" step="0.01" value="{{ threshold or 0.50 }}" oninput="this.nextElementSibling.value = this.value" />
+            <output>{{ threshold or 0.50 }}</output>
+          </div>
+          <p class="muted" style="margin-top:6px;">Lower matches more aggressively; higher is stricter.</p>
+        </div>
+      </div>
+      <div class="actions-row" style="margin-top:8px;">
+        <button class="primary">🔍 Analyze</button>
+        <a class="secondary" href="/recognize">Reset</a>
+      </div>
+    </form>
+  </div>
+  {% elif step == 'review' %}
+  <div class="grid-2">
+    <div class="card soft">
+      <div class="toolbar">
+        <div>
+          <h3 style="margin:0;">Preview</h3>
+          <div class="subtle">Detected Faces: <strong>{{ faces|length }}</strong> • Threshold {{ threshold }}</div>
+        </div>
+        <div class="badge-row">
+          {% set known_count = faces|selectattr('name','ne','Unknown')|list|length %}
+          {% set unknown_count = faces|selectattr('name','equalto','Unknown')|list|length %}
+          <span class="badge green">Known: {{ known_count }}</span>
+          <span class="badge red">Unknown: {{ unknown_count }}</span>
+          {% set susp_count = faces|selectattr('suspicious')|list|length %}
+          <span class="badge yellow">Suspicious: {{ susp_count }}</span>
+        </div>
+      </div>
+      <div class="card-thumb">
+        <img class="preview-frame" src="{{ preview_path }}" alt="preview" />
+      </div>
+    </div>
+
+    <div class="card soft">
+      <div class="toolbar">
+        <h3 style="margin:0;">Register Unknown Faces</h3>
+        <span class="muted">Only Unknown faces need details; recognized faces are locked.</span>
+      </div>
+      <form method="post" action="/recognize/register" class="form" style="margin-top:12px;">
+        <input type="hidden" name="upload_file" value="{{ upload_file }}" />
+        <input type="hidden" name="threshold" value="{{ threshold or 0.50 }}" />
+        <div class="grid-gallery">
+          {% for f in faces %}
+            <div class="face-card {% if f.name != 'Unknown' %}known{% else %}unknown{% endif %} {% if f.suspicious %}suspicious{% endif %}">
+              <div class="card-thumb" style="height:140px;">
+                <img src="{{ f.crop_path }}" alt="face" style="height:100%;width:auto;border-radius:12px;object-fit:cover;" />
+              </div>
+              <div class="info">
+                {% if f.name != 'Unknown' %}
+                  <div class="badge-row">
+                    <span class="badge green">Recognized</span>
+                    <span class="badge">{{ f.category }}</span>
+                    {% if f.suspicious %}<span class="badge yellow">Suspicious</span>{% endif %}
+                  </div>
+                  <div><strong>{{ f.name }}</strong></div>
+                {% else %}
+                  <div class="badge-row">
+                    <span class="badge red">Unknown</span>
+                    {% if f.suspicious %}<span class="badge yellow">Suspicious</span>{% endif %}
+                  </div>
+                  <div class="form-row">
+                    <label>Name</label>
+                    <input type="text" name="name_{{ loop.index0 }}" placeholder="Enter full name" />
+                  </div>
+                  <div class="form-row">
+                    <label>Department</label>
+                    <input type="text" name="dept_{{ loop.index0 }}" placeholder="Department" />
+                  </div>
+                  <div class="form-row">
+                    <label>ID</label>
+                    <input type="text" name="pid_{{ loop.index0 }}" placeholder="Personnel ID (optional)" />
+                  </div>
+                  <div class="form-row">
+                    <label>Category</label>
+                    <select name="category_{{ loop.index0 }}">
+                      <option value="Normal">Normal</option>
+                      <option value="VIP">VIP</option>
+                      <option value="Blacklisted">Blacklisted</option>
+                    </select>
+                  </div>
+                {% endif %}
+                <input type="hidden" name="left_{{ loop.index0 }}" value="{{ f.left }}" />
+                <input type="hidden" name="top_{{ loop.index0 }}" value="{{ f.top }}" />
+                <input type="hidden" name="right_{{ loop.index0 }}" value="{{ f.right }}" />
+                <input type="hidden" name="bottom_{{ loop.index0 }}" value="{{ f.bottom }}" />
+              </div>
+            </div>
+          {% endfor %}
+        </div>
+        <div style="margin-top:16px; display:flex; gap:8px;">
+          <a class="secondary" href="/recognize">Back</a>
+          <button class="primary">💾 Save & Log</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div class="card" style="grid-column: 1 / -1;">
+    <div class="card-header">
+      <h3>Register Unknown Faces</h3>
+    </div>
+    <form method="post" action="/recognize/register" class="form">
+      <input type="hidden" name="upload_file" value="{{ upload_file }}" />
+      <input type="hidden" name="threshold" value="{{ threshold or 0.50 }}" />
+      <div class="grid" style="display:grid;grid-template-columns: repeat(2, minmax(280px, 1fr)); gap: 16px;">
+        {% for f in faces %}
+          <div class="card">
+            <div class="card-body" style="display:flex; gap:12px; align-items:center;">
+              <img src="{{ f.crop_path }}" alt="face" style="height:80px;width:80px;border-radius:8px;object-fit:cover;" />
+              <div style="flex:1;">
+                {% if f.name != 'Unknown' %}
+                  <div class="muted">Recognized</div>
+                  <div><strong>{{ f.name }}</strong> • {{ f.category }}{% if f.suspicious %} · Suspicious{% endif %}</div>
+                {% else %}
+                  <div class="muted">Unknown</div>
+                  <div class="form-row">
+                    <label>Name</label>
+                    <input type="text" name="name_{{ loop.index0 }}" placeholder="Enter name" />
+                  </div>
+                  <div class="form-row">
+                    <label>Department</label>
+                    <input type="text" name="dept_{{ loop.index0 }}" placeholder="Department" />
+                  </div>
+                  <div class="form-row">
+                    <label>ID</label>
+                    <input type="text" name="pid_{{ loop.index0 }}" placeholder="Employee/Student ID" />
+                  </div>
+                  <div class="form-row">
+                    <label>Category</label>
+                    <select name="category_{{ loop.index0 }}">
+                      <option value="Normal">Normal</option>
+                      <option value="VIP">VIP</option>
+                      <option value="Blacklisted">Blacklisted</option>
+                    </select>
+                  </div>
+                {% endif %}
+                <input type="hidden" name="left_{{ loop.index0 }}" value="{{ f.left }}" />
+                <input type="hidden" name="top_{{ loop.index0 }}" value="{{ f.top }}" />
+                <input type="hidden" name="right_{{ loop.index0 }}" value="{{ f.right }}" />
+                <input type="hidden" name="bottom_{{ loop.index0 }}" value="{{ f.bottom }}" />
+              </div>
+            </div>
+          </div>
+        {% endfor %}
+      </div>
+      <div style="margin-top:16px; display:flex; gap:8px;">
+        <a class="secondary" href="/recognize">Back</a>
+        <button class="primary">Save & Log</button>
+      </div>
+    </form>
+  </div>
+  {% elif step == 'done' %}
+  <div class="card soft" style="grid-column: 1 / -1;">
+    <div class="card-header">
+      <h3>Saved</h3>
+    </div>
+    <p class="muted">Annotated image has been saved and events logged.</p>
+    {% if full_image %}
+      <div class="gallery" style="grid-template-columns: 1fr;">
+        <div class="gallery-item">
+          <img src="{{ full_image }}" alt="result" />
+        </div>
+      </div>
+      <div style="margin-top:8px;">
+        <a class="secondary" href="{{ full_image }}" download>Download annotated image</a>
+      </div>
+    {% endif %}
+    <div style="margin-top:16px; display:flex; gap:8px;">
+      <a class="secondary" href="/recognize">Recognize Another</a>
+      <a class="primary" href="/results">View Results</a>
+    </div>
+  </div>
+  {% endif %}
+</div>
+{% endblock %}

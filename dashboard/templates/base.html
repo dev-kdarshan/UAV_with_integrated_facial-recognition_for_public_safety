@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{{ title or 'Analytics Dashboard' }}</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/styles.css" />
+    <script defer src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script defer src="/static/app.js"></script>
+  </head>
+  <body>
+    <aside class="sidebar">
+      <div class="brand">Drone Analytics</div>
+      <nav class="nav">
+        <a class="nav-item {% if active=='dashboard' %}active{% endif %}" href="/">🏠 <span>Dashboard</span></a>
+        <a class="nav-item {% if active=='recognize' %}active{% endif %}" href="/recognize">🧠 <span>Recognize</span></a>
+        <a class="nav-item {% if active=='results' %}active{% endif %}" href="/results">📑 <span>Results</span></a>
+        <a class="nav-item {% if active=='reports' %}active{% endif %}" href="/reports">📈 <span>Reports</span></a>
+        <a class="nav-item {% if active=='users' %}active{% endif %}" href="/users">👥 <span>Users</span></a>
+        <a class="nav-item {% if active=='surveillance' %}active{% endif %}" href="/surveillance">🎥 <span>Surveillance</span></a>
+        <a class="nav-item {% if active=='settings' %}active{% endif %}" href="/settings">⚙️ <span>Settings</span></a>
+        {% if current_user %}
+          <a class="nav-item" href="/logout">🔒 <span>Logout ({{ current_user.username }})</span></a>
+        {% else %}
+          <a class="nav-item {% if active=='login' %}active{% endif %}" href="/login">🔑 <span>Login</span></a>
+        {% endif %}
+      </nav>
+      <button class="collapse-btn" id="collapseSidebar">⟨⟩</button>
+    </aside>
+
+    <main class="content">
+      <header class="topbar">
+        <div class="search">
+          <input id="globalSearch" type="text" placeholder="Search..." />
+          <button>🔍</button>
+        </div>
+        <div class="actions">
+          <button class="icon-btn" title="Notifications">🔔</button>
+          <button class="icon-btn" id="themeToggle" title="Toggle Theme">🌓</button>
+          <div class="profile">
+            <img src="https://api.dicebear.com/7.x/initials/svg?seed={{ current_user.username if current_user else 'Guest' }}" alt="avatar" />
+            <span>{{ current_user.username if current_user else 'Guest' }}</span>
+            <div class="dropdown">
+              <a href="/users">Profile</a>
+              <a href="/settings">Settings</a>
+              {% if current_user %}
+                <a href="/logout">Logout</a>
+              {% else %}
+                <a href="/login">Login</a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <section class="page">
+        {% block page %}{% endblock %}
+      </section>
+    </main>
+  </body>
+  </html>

@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block page %}
+<div class="cards">
+  <div class="card" style="grid-column: 1 / -1;">
+    <div class="card-header"><h3>Reports Export (HTML)</h3></div>
+    <div class="table-wrapper">
+      <table class="table">
+        <thead>
+          <tr>
+            <th>Time</th><th>Name</th><th>Confidence</th><th>Status</th><th>Source</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for d in detections %}
+          <tr>
+            <td>{{ d.timestamp }}</td>
+            <td>{{ d.name }}</td>
+            <td>{{ '%.1f'|format(d.confidence or 0) }}%</td>
+            <td>{{ d.status }}</td>
+            <td>{{ d.source }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
